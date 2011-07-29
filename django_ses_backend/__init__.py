@@ -47,8 +47,8 @@ class SESConnection:
         
 class SESBackend(BaseEmailBackend):
    
-    def __init__(self,fail_silently=False):
-        super(EmailBackend, self).__init__(fail_silently=fail_silently)
+    def __init__(self,fail_silently=False,**kwargs):
+        super(SESBackend, self).__init__(fail_silently=fail_silently)
         self.connection = ''
         
     
