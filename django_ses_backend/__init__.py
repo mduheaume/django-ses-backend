@@ -9,6 +9,9 @@ from django.conf import settings
 from django.core.mail.backends.base import BaseEmailBackend
 
 class SESConnection:
+    """An interface to Amazon's SImple Email Service.
+    """
+    
     def __init__(self, aws_access_key_id, aws_secret_access_key):
         self._aws_access_key_id=aws_access_key_id
         self._aws_secret_access_key=aws_secret_access_key
@@ -26,6 +29,8 @@ class SESConnection:
         return headers    
         
     def send_mail(self, mail_from, recipients, message):
+        """Send raw message data though SES
+        """
         message_b64=base64.b64encode(message)
         params = {'Source': mail_from}
         n=0
@@ -51,49 +56,44 @@ class SESBackend(BaseEmailBackend):
         super(SESBackend, self).__init__(fail_silently=fail_silently)
         self.connection = ''
         
-    
-    # Calculates the 
     def open(self):
+        """Create the connection to AWS
+        """
         self.connection = SESConnection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
 
     def close(self):
+        """Close the connection to AWS
+        """
         self.connection = None
 
     def send_messages(self, email_messages):
-        #Check if email_messages is empty
+        """Sends one or more EmailMessage objects and returns the number of
+        messages sent.
+        """
         if not email_messages:
             return
-        
-        #Create new connection
-        create_new_conn = self.open()
+
+        conn = self.open()
         if not self.connection:
-            #obviously create_new_conn failed
             return
         
-        # iterate through email messages
         num_sent = 0
         for message in email_messages:
-            #Send message
             result = self._send(message)
-            #Increase count
             if result:
                 num_sent += 1
         
-        if create_new_conn:
+        if conn:
             self.close()
         
         return num_sent
     
     def _send(self, email_message):
-        # check if message has recipients
+        """Sends an EmailMessage object
+        """
         recipients = email_message.recipients()
         if not recipients:
-            return False
-        
-        #Only works in django 1.3
-        #from_email = sanitize_address(email_message.from_email, email_message.encoding)
-        #recipients = [sanitize_address(addr, email_message.encoding)
-        #              for addr in recipients]
+            return False        
         try:
             self.connection.send_mail(email_message.from_email, email_message.recipients(),
                     email_message.message().as_string())
