@@ -21,7 +21,7 @@ setup(
     packages=['django_ses_backend'],
     author='Mike du Heaume',
     author_email='mduheaume@gmail.com',
-    url='http://github.com/mduheaume/django-mailgun/',
+    url='http://github.com/mduheaume/django-ses-backend/',
     license='BSD',
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
